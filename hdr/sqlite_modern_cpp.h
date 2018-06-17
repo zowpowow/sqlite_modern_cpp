@@ -85,11 +85,11 @@ namespace sqlite {
 			return ++_inx;
 		}
 
-		sqlite3_stmt* _prepare(const U16STR_REF& sql) {
+		sqlite3_stmt* _prepare(U16STR_REF sql) {
 			return _prepare(utility::utf16_to_utf8(sql));
 		}
 
-		sqlite3_stmt* _prepare(const STR_REF& sql) {
+		sqlite3_stmt* _prepare(STR_REF sql) {
 			int hresult;
 			sqlite3_stmt* tmp = nullptr;
 			const char *remaining;
@@ -105,13 +105,13 @@ namespace sqlite {
 
 	public:
 
-		database_binder(std::shared_ptr<sqlite3> db, U16STR_REF const & sql):
+		database_binder(std::shared_ptr<sqlite3> db, U16STR_REF sql):
 			_db(db),
 			_stmt(_prepare(sql), sqlite3_finalize),
 			_inx(0) {
 		}
 
-		database_binder(std::shared_ptr<sqlite3> db, STR_REF const & sql):
+		database_binder(std::shared_ptr<sqlite3> db, STR_REF sql):
 			_db(db),
 			_stmt(_prepare(sql), sqlite3_finalize),
 			_inx(0) {
@@ -380,20 +380,20 @@ namespace sqlite {
 		database(std::shared_ptr<sqlite3> db):
 			_db(db) {}
 
-		database_binder operator<<(const STR_REF& sql) {
+		database_binder operator<<(STR_REF sql) {
 			return database_binder(_db, sql);
 		}
 
 		database_binder operator<<(const char* sql) {
-			return *this << STR_REF(sql);
+			return *this << std::string_view(sql);
 		}
 
-		database_binder operator<<(const U16STR_REF& sql) {
+		database_binder operator<<(U16STR_REF sql) {
 			return database_binder(_db, sql);
 		}
 
 		database_binder operator<<(const char16_t* sql) {
-			return *this << U16STR_REF(sql);
+			return *this << std::u16string_view(sql);
 		}
 
 		connection_type connection() const { return _db; }

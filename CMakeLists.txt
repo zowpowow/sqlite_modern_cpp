@@ -33,9 +33,15 @@ enable_testing()
 
 add_library (sqlite_modern_cpp INTERFACE)
 target_include_directories(sqlite_modern_cpp INTERFACE hdr/)
-
+set(svBenchmark_SOURCE_DIR ${CMAKE_SOURCE_DIR}/string_view_ref_benchmark)
+file(GLOB svBenchmark_sources ${svBenchmark_SOURCE_DIR}/*.cpp)
+add_executable(svBenchmark  ${svBenchmark_sources})
 add_executable(tests ${TEST_SOURCES})
+
 target_include_directories(tests INTERFACE ${SQLITE3_INCLUDE_DIRS})
+target_include_directories(svBenchmark PUBLIC ${svBenchmark_SOURCE_DIR}/includes)
+target_include_directories(svBenchmark INTERFACE ${SQLITE3_INCLUDE_DIRS})
+target_link_libraries(svBenchmark sqlite_modern_cpp sqlite3::sqlite3)
 if(ENABLE_SQLCIPHER_TESTS)
     target_link_libraries(tests Catch::Catch sqlite_modern_cpp sqlite3::sqlite3 -lsqlcipher)
 else()
@@ -44,7 +50,8 @@ endif()
 
 catch_discover_tests(tests)
 target_compile_options(tests PUBLIC $<$<CXX_COMPILER_ID:MSVC>:/Zc:__cplusplus> )
-
+target_compile_options(svBenchmark PUBLIC $<$<CXX_COMPILER_ID:MSVC>:/Zc:__cplusplus> )
+target_compile_options(svBenchmark PUBLIC $<$<CXX_COMPILER_ID:MSVC>:/arch:AVX2> )
 # Place the file in the source directory, permitting us to place a single configuration file for YCM there.
 # YCM is the code-completion engine for (neo)vim https://github.com/Valloric/YouCompleteMe
 IF(EXISTS "${CMAKE_BINARY_DIR}/compile_commands.json")
